@@ -4,39 +4,27 @@ class Program
 {
     static void Main(string[] args)
     {
-        using (var tempFile = new TempFile())
+        using (var tempTxtFile = new TempTxtFile())
         {
-            Console.WriteLine($"Created temporary file at: {tempFile.FilePath}");
-            tempFile.AddText("Hello, this is a test!");
-            Console.WriteLine("Text added to file.");
+            Console.WriteLine($"Created temporary text file at: {tempTxtFile.FilePath}");
+            tempTxtFile.Write("Hello, ");
+            tempTxtFile.WriteLine("this is a test line!");
+            Console.WriteLine("Text written to file.");
+            Console.WriteLine("Reading all text: " + tempTxtFile.ReadAllText());
+            Console.WriteLine("Reading first line: " + tempTxtFile.ReadLine());
         }
         Console.WriteLine("After using block - file should be deleted.");
 
-        var tempFile2 = new TempFile();
-        Console.WriteLine($"Created temporary file at: {tempFile2.FilePath}");
-        tempFile2.Dispose();
+        var tempTxtFile2 = new TempTxtFile();
+        Console.WriteLine($"Created temporary text file at: {tempTxtFile2.FilePath}");
+        tempTxtFile2.Dispose();
         try
         {
-            tempFile2.AddText("This should fail.");
+            tempTxtFile2.Write("This should fail.");
         }
         catch (ObjectDisposedException ex)
         {
             Console.WriteLine("Caught ObjectDisposedException: " + ex.Message);
-        }
-
-        var tempFile3 = new TempFile();
-        try
-        {
-            tempFile3.AddText("Test without using.");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Exception: " + ex.Message);
-        }
-        finally
-        {
-            tempFile3.Dispose();
-            Console.WriteLine("Manually disposed temporary file.");
         }
     }
 }
