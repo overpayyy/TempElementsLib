@@ -33,6 +33,8 @@ public class TempElementsList : ITempElements
         string directory = Path.GetDirectoryName(newPath) ?? string.Empty;
         if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
 
+        element.PrepareForMove();
+
         if (element is TempFile)
         {
             File.Move(sourcePath, newPath);

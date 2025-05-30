@@ -29,6 +29,10 @@ public class TempDir : ITempDir
         try
         {
             _filePath = path;
+            if (Directory.Exists(_filePath))
+            {
+                Directory.Delete(_filePath, true);
+            }
             _dirInfo = Directory.CreateDirectory(_filePath);
             _isDisposed = false;
         }
@@ -45,6 +49,11 @@ public class TempDir : ITempDir
     public bool IsEmpty => _dirInfo.GetFileSystemInfos().Length == 0;
 
     public DirectoryInfo DirInfo => _dirInfo;
+
+    public void PrepareForMove()
+    {
+        // Для каталогів не потрібно закривати потоки, але метод присутній для узгодженості
+    }
 
     public void Dispose()
     {

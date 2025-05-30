@@ -53,6 +53,12 @@ public class TempFile : ITempFile
         fileStream.Flush();
     }
 
+    public void PrepareForMove()
+    {
+        fileStream?.Flush();
+        fileStream?.Close();
+    }
+
     public void Dispose()
     {
         if (!_isDisposed)

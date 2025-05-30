@@ -1,33 +1,44 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string customPath = Path.Combine(Path.GetTempPath(), "CustomTempDir");
-        using (var tempDir = new TempDir(customPath))
+        using (var tempElements = new TempElementsList())
         {
-            Console.WriteLine($"Created temporary directory at: {tempDir.FilePath}");
+            tempElements.AddElement<TempTxtFile>();
+            var tempTxtFile = (TempTxtFile)tempElements.Elements.First(e => e is TempTxtFile);
+            tempTxtFile.WriteLine("This is a test line.");
+            Console.WriteLine($"Created TempTxtFile at: {tempTxtFile.FilePath}");
+            Console.WriteLine($"Content: {tempTxtFile.ReadAllText()}");
+
+            string customDirPath = Path.Combine(Path.GetTempPath(), "CustomTempDir");
+            var tempDir = new TempDir(customDirPath);
+            tempElements.AddElement<TempDir>();
+            Console.WriteLine($"Created TempDir at: {tempDir.FilePath}");
             Console.WriteLine($"Is directory empty: {tempDir.IsEmpty}");
 
-            string testFilePath = Path.Combine(tempDir.FilePath, "test.txt");
-            File.WriteAllText(testFilePath, "Test content");
-            Console.WriteLine($"Created test file in directory. Is directory empty: {tempDir.IsEmpty}");
-        }
-        Console.WriteLine("After using block - directory should be deleted.");
+            string fileInDirPath = Path.Combine(tempDir.FilePath, "fileInDir.txt");
+            File.WriteAllText(fileInDirPath, "File inside directory.");
+            Console.WriteLine($"Created file in directory. Is empty: {tempDir.IsEmpty}");
 
-        var tempDir2 = new TempDir();
-        Console.WriteLine($"Created temporary directory at: {tempDir2.FilePath}");
-        tempDir2.Dispose();
-        try
-        {
-            Directory.CreateDirectory(tempDir2.FilePath);
-            Console.WriteLine("This should fail.");
+            string newFilePath = Path.Combine(tempDir.FilePath, "movedFile.txt");
+            tempElements.MoveElementTo<TempTxtFile>(tempTxtFile, newFilePath);
+            tempTxtFile = (TempTxtFile)tempElements.Elements.First(e => e is TempTxtFile);
+            Console.WriteLine($"Moved TempTxtFile to: {tempTxtFile.FilePath}");
+            Console.WriteLine($"Content after move: {tempTxtFile.ReadAllText()}");
+
+            tempElements.DeleteElement<TempTxtFile>(tempTxtFile);
+            Console.WriteLine($"Deleted TempTxtFile. Elements count: {tempElements.Elements.Count()}");
+
+            tempElements.DeleteElement<TempDir>(tempDir);
+            Console.WriteLine($"Deleted TempDir. Elements count: {tempElements.Elements.Count()}");
+
+            tempElements.RemoveDestroyed();
+            Console.WriteLine($"After RemoveDestroyed, elements count: {tempElements.Elements.Count()}");
         }
-        catch (IOException ex)
-        {
-            Console.WriteLine("Caught IOException: " + ex.Message);
-        }
+        Console.WriteLine("After using block - all elements should be deleted.");
     }
 }
