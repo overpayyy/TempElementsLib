@@ -1,30 +1,32 @@
 ﻿using System;
+using System.IO;
 
 class Program
 {
     static void Main(string[] args)
     {
-        using (var tempTxtFile = new TempTxtFile())
+        using (var tempDir = new TempDir())
         {
-            Console.WriteLine($"Created temporary text file at: {tempTxtFile.FilePath}");
-            tempTxtFile.Write("Hello, ");
-            tempTxtFile.WriteLine("this is a test line!");
-            Console.WriteLine("Text written to file.");
-            Console.WriteLine("Reading all text: " + tempTxtFile.ReadAllText());
-            Console.WriteLine("Reading first line: " + tempTxtFile.ReadLine());
-        }
-        Console.WriteLine("After using block - file should be deleted.");
+            Console.WriteLine($"Created temporary directory at: {tempDir.DirPath}");
+            Console.WriteLine($"Is directory empty: {tempDir.IsEmpty}");
 
-        var tempTxtFile2 = new TempTxtFile();
-        Console.WriteLine($"Created temporary text file at: {tempTxtFile2.FilePath}");
-        tempTxtFile2.Dispose();
+            string testFilePath = Path.Combine(tempDir.DirPath, "test.txt");
+            File.WriteAllText(testFilePath, "Test content");
+            Console.WriteLine($"Created test file in directory. Is directory empty: {tempDir.IsEmpty}");
+        }
+        Console.WriteLine("After using block - directory should be deleted.");
+
+        var tempDir2 = new TempDir();
+        Console.WriteLine($"Created temporary directory at: {tempDir2.DirPath}");
+        tempDir2.Dispose();
         try
         {
-            tempTxtFile2.Write("This should fail.");
+            Directory.CreateDirectory(tempDir2.DirPath);
+            Console.WriteLine("This should fail.");
         }
-        catch (ObjectDisposedException ex)
+        catch (IOException ex)
         {
-            Console.WriteLine("Caught ObjectDisposedException: " + ex.Message);
+            Console.WriteLine("Caught IOException: " + ex.Message);
         }
     }
 }
