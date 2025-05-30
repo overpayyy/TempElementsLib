@@ -25,6 +25,22 @@ public class TempFile : ITempFile
         }
     }
 
+    public TempFile(string path)
+    {
+        if (string.IsNullOrEmpty(path)) throw new ArgumentException("Path cannot be null or empty.", nameof(path));
+        try
+        {
+            _filePath = path;
+            fileStream = new FileStream(_filePath, FileMode.Create, FileAccess.ReadWrite);
+            fileInfo = new FileInfo(_filePath);
+            _isDisposed = false;
+        }
+        catch (IOException ex)
+        {
+            throw new IOException($"Failed to create file at {path}.", ex);
+        }
+    }
+
     public string FilePath => _filePath;
 
     public bool IsDestroyed => _isDisposed;

@@ -1,9 +1,6 @@
 ﻿using System;
 
-public interface ITempFile : IDisposable
+public interface ITempFile : ITempElement
 {
-    string FilePath { get; }
-    bool IsDestroyed { get; }
-    void Dispose();
     void AddText(string value);
 }

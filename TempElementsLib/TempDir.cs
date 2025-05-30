@@ -3,7 +3,7 @@ using System.IO;
 
 public class TempDir : ITempDir
 {
-    private string _dirPath;
+    private string _filePath;
     private DirectoryInfo _dirInfo;
     private bool _isDisposed;
 
@@ -13,8 +13,8 @@ public class TempDir : ITempDir
         {
             string tempPath = Path.GetTempPath();
             string randomName = Guid.NewGuid().ToString();
-            _dirPath = Path.Combine(tempPath, randomName);
-            _dirInfo = Directory.CreateDirectory(_dirPath);
+            _filePath = Path.Combine(tempPath, randomName);
+            _dirInfo = Directory.CreateDirectory(_filePath);
             _isDisposed = false;
         }
         catch (IOException ex)
@@ -23,7 +23,22 @@ public class TempDir : ITempDir
         }
     }
 
-    public string DirPath => _dirPath;
+    public TempDir(string path)
+    {
+        if (string.IsNullOrEmpty(path)) throw new ArgumentException("Path cannot be null or empty.", nameof(path));
+        try
+        {
+            _filePath = path;
+            _dirInfo = Directory.CreateDirectory(_filePath);
+            _isDisposed = false;
+        }
+        catch (IOException ex)
+        {
+            throw new IOException($"Failed to create directory at {path}.", ex);
+        }
+    }
+
+    public string FilePath => _filePath;
 
     public bool IsDestroyed => _isDisposed;
 
@@ -37,9 +52,9 @@ public class TempDir : ITempDir
         {
             try
             {
-                if (Directory.Exists(_dirPath))
+                if (Directory.Exists(_filePath))
                 {
-                    Directory.Delete(_dirPath, true);
+                    Directory.Delete(_filePath, true);
                 }
                 _isDisposed = true;
             }

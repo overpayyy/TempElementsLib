@@ -13,6 +13,12 @@ public class TempTxtFile : TempFile, ITempTxtFile
         _streamReader = new StreamReader(fileStream, new UTF8Encoding(true), true, 1024, true);
     }
 
+    public TempTxtFile(string path) : base(path)
+    {
+        _streamWriter = new StreamWriter(fileStream, new UTF8Encoding(true), 1024, true);
+        _streamReader = new StreamReader(fileStream, new UTF8Encoding(true), true, 1024, true);
+    }
+
     public string ReadAllText()
     {
         if (IsDestroyed) throw new ObjectDisposedException(nameof(TempTxtFile));
